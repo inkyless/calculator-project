@@ -1,25 +1,25 @@
 // Create functions of basic for calculators
 // Addition, Subtraction, Multiplication, Division
 
-const addNum = function (a,b) {
+function addNum(a, b) {
     return Number(a) + Number(b)
 }
 
-const subNum = function (a,b) {
+function subNum(a, b) {
     return Number(a) - Number(b)
 }
 
-const mulNum = function (a,b) {
+function mulNum(a, b) {
     return Number(a) * Number(b)
 }
 
-const divNum = function (a,b) {
+function divNum(a, b) {
     return Number(a) / Number(b)
 }
 
 // Create counter display for button input
 const counterResult = document.querySelector(".counter-result")
-const numContainer = []; // Create container to put all value inputed
+let numContainer = []; // Create container to put all value inputed
 let firstValue = document.querySelector(".first-num")
 let operator = document.querySelector(".operator-function")
 let secondValue = document.querySelector(".second-num")
@@ -28,15 +28,40 @@ let secondValue = document.querySelector(".second-num")
 const numButton = document.querySelector(".number-button")
 const opButton = document.querySelector(".operator-button")
 
+const resultDisplay = document.querySelector(".result-display")
+
+
+// Create Clear Button to clear all inputs
+function createClearButton() {
+    const clearButton = document.createElement("button")
+    clearButton.textContent = "Clear"
+    clearButton.addEventListener("click", () => {
+        numContainer = [];
+        counterResult.innerHTML = "";
+    })
+    opButton.appendChild(clearButton)
+}
+
+// Create Reset Button to clear all inputs including the results
+function createResetButton() {
+    const resetButton = document.createElement("button")
+    resetButton.textContent = "Reset"
+    resetButton.addEventListener("click", () => {
+        resultDisplay.innerHTML = ""
+        numContainer = [];
+        counterResult.innerHTML = "";
+    })
+    opButton.appendChild(resetButton)
+}
+
 // Create backspace button
-function createDelButton(){
+function createDelButton() {
     const backButton = document.createElement("button")
     backButton.textContent = "BackSpace"
-    backButton.addEventListener("click",()=>{
+    backButton.addEventListener("click", () => {
         const lastInput = document.querySelector("span:last-child")
         numContainer.pop();
         lastInput.remove(); // Remove last value inputted
-        console.log(numContainer)
     })
     opButton.appendChild(backButton)
 }
@@ -52,13 +77,13 @@ function createNumButtons() {
         numButton.appendChild(createButton)
     }
     const numberButtons = document.querySelectorAll(".numbers")
-    numberButtons.forEach((button)=>{
-        button.addEventListener("click",(e)=>{
+    numberButtons.forEach((button) => {
+        button.addEventListener("click", (e) => {
             // Add the inputed button to counter display]
             const numValue = Number(e.target.value)
             numContainer.push(numValue)
-            console.log(numContainer)
             const spanBox = document.createElement("span")
+            spanBox.setAttribute("class", "input-counter")
             spanBox.value = numValue
             spanBox.textContent = numValue
             counterResult.appendChild(spanBox)
@@ -67,30 +92,39 @@ function createNumButtons() {
 
 }
 
+
+
 // Create Operators Numbers
 const operators = [
     {
         symbol: "+",
         meaning: "plus",
-        isEqual: false
-        
+        isEqual: false,
+        functionUsed: addNum,
+
     },
     {
         symbol: "-",
         meaning: "substract",
-        isEqual: false
+        isEqual: false,
+        functionUsed: subNum,
+
 
     },
     {
         symbol: "X",
         meaning: "multi",
-        isEqual: false
+        isEqual: false,
+        functionUsed: mulNum,
+
 
     },
     {
         symbol: "/",
         meaning: "divide",
-        isEqual: false
+        isEqual: false,
+        functionUsed: divNum,
+
     },
     {
         symbol: "=",
@@ -100,14 +134,18 @@ const operators = [
 
 ]
 
+
+
+// Create Operators Button Function
 function createOpButtons() {
+
     operators.map((item) => {
         const createButton = document.createElement("button")
         createButton.setAttribute("id", `operator-${item.meaning}`)
-        if (item.isEqual){
+        if (item.isEqual) {
             createButton.setAttribute("class", `equals`)
 
-        } else{
+        } else {
             createButton.setAttribute("class", `operators`)
         }
         createButton.textContent = item.symbol;
@@ -115,45 +153,76 @@ function createOpButtons() {
         opButton.appendChild(createButton)
     })
     const opButtons = document.querySelectorAll(".operators")
-        opButtons.forEach((button)=>{
-        button.addEventListener("click",(e)=>{
+    opButtons.forEach((button) => {
+        button.addEventListener("click", (e) => {
+
             // Add the inputed button to counter display]
             const opValue = e.target.value
             numContainer.push(opValue)
-            console.log(numContainer)
             const spanBox = document.createElement("span")
             spanBox.value = opValue
             spanBox.textContent = opValue
             counterResult.appendChild(spanBox)
+
+            if (button.classList.contains("operators")) {
+                const getOperatorList = [...operators.map((item) => item.symbol)] // Get operators availabel
+                const filterOp = numContainer.filter((sub) => getOperatorList.includes(sub))
+                const filterSecOp = filterOp.length > 1
+                // Create a function where input second operator will use operate automatically 
+                function secondOperator() {
+                    numContainer.pop()
+                    operate()
+                    counterResult.appendChild(spanBox)
+                    numContainer.push(opValue)
+                }
+
+                if (filterSecOp) {
+                    secondOperator()
+                }
+            }
+
         })
     })
 
 }
 
-
 // This function will operate when user pressing equal button
 function operate() {
     // First to seperate operator symbol from array
-    const getOperator = operators.map((item)=>item.symbol) // Get operators availabel
-    const equalSpan = document.querySelector(".equals")
-    numContainer.pop("=") // Delete equal symbol from numContainer array
-    
-    const operatorInput = numContainer.filter(item=>item in getOperator)
-    console.log(operatorInput)
+    const getOperatorList = [...operators.map((item) => item.symbol)] // Get operators availabel
 
+    // Get index of operator to splice the array to first and second input number
+    const operatorIdx = getOperatorList.map(item => { return numContainer.indexOf(item) })
+    const getIdx = Number(operatorIdx.filter((idx => parseInt(idx) > -1)))
+    const operatorValue = numContainer[getIdx]
+    // Create variable for fist and last number
+    let getfirstNum = Number(numContainer.slice(0, getIdx).join(""))
+    let getLastNum = Number(numContainer.slice(Number(getIdx) + 1).join(""))
+
+    // Assign function for each operators symbol
+    const assignOperator = operators.find(oper => oper.symbol === operatorValue)
+    const getFunction = assignOperator.functionUsed
+
+    // Return calculate result
+    let result = getFunction(getfirstNum, getLastNum)
+    counterResult.textContent = result
+
+    // Clear the counter display 
+    numContainer = [result];
 }
 
+
+
+
+// Main Function
 createNumButtons()
 createOpButtons()
+createClearButton()
 createDelButton()
+createResetButton()
 
-const addButton = document.querySelector(".operator-plus");
-const subButton = document.querySelector(".operator-substract");
-const mulButton = document.querySelector(".operator-mutli");
-const divButton = document.querySelector(".operator-divide");
 const equalButton = document.querySelector("#operator-equal");
-
-equalButton.addEventListener("click",operate)
+equalButton.addEventListener("click", operate)
 
 
 
