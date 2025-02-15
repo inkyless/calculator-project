@@ -14,7 +14,13 @@ function mulNum(a, b) {
 }
 
 function divNum(a, b) {
-    return Number(a) / Number(b)
+    // Show error message when user try to divide by zero
+    if (Number(b) === 0) {
+        counterResult.textContent = "Error";
+        resultDisplay.textContent = "Divide by 0 will cause infinite result"
+    } else {
+        return (Number(a) / Number(b)).toFixed(4)
+    }
 }
 
 // Create counter display for button input
@@ -28,7 +34,7 @@ let secondValue = document.querySelector(".second-num")
 const numButton = document.querySelector(".number-button")
 const opButton = document.querySelector(".operator-button")
 
-const resultDisplay = document.querySelector(".result-display")
+const resultDisplay = document.querySelector(".error-display")
 
 
 // Create Clear Button to clear all inputs
@@ -38,21 +44,11 @@ function createClearButton() {
     clearButton.addEventListener("click", () => {
         numContainer = [];
         counterResult.innerHTML = "";
+        resultDisplay.innerHTML = "";
     })
     opButton.appendChild(clearButton)
 }
 
-// Create Reset Button to clear all inputs including the results
-function createResetButton() {
-    const resetButton = document.createElement("button")
-    resetButton.textContent = "Reset"
-    resetButton.addEventListener("click", () => {
-        resultDisplay.innerHTML = ""
-        numContainer = [];
-        counterResult.innerHTML = "";
-    })
-    opButton.appendChild(resetButton)
-}
 
 // Create backspace button
 function createDelButton() {
@@ -66,35 +62,41 @@ function createDelButton() {
     opButton.appendChild(backButton)
 }
 
-// Create number Buttons from (0-9)
+// Create number Buttons from (0-9) and (.)
 function createNumButtons() {
-    for (let i = 0; i < 10; i++) {
+    // The array will be arranged in that position
+    const numberInputList = [".",0,3,2,1,6,5,4,9,8,7]
+    numberInputList.reverse().map((item) => {
         const createButton = document.createElement("button")
-        createButton.setAttribute("id", `number-${i}`)
+        createButton.setAttribute("id", `number-${item}`)
         createButton.setAttribute("class", `numbers`)
-        createButton.value = i
-        createButton.textContent = i;
+        createButton.value = item
+        createButton.textContent = item;
         numButton.appendChild(createButton)
-    }
+    })
     const numberButtons = document.querySelectorAll(".numbers")
     numberButtons.forEach((button) => {
         button.addEventListener("click", (e) => {
-            // Add the inputed button to counter display]
-            const numValue = Number(e.target.value)
-            numContainer.push(numValue)
+            // Add the inputed button to counter display
+            const numValue = (e.target.value)
+            if (numValue === ".") {
+                numContainer.push(".")
+            }
+            else {
+                numContainer.push(numValue)
+            }
             const spanBox = document.createElement("span")
-            spanBox.setAttribute("class", "input-counter")
+            spanBox.setAttribute("class", "number-counter")
             spanBox.value = numValue
             spanBox.textContent = numValue
             counterResult.appendChild(spanBox)
         })
     })
-
 }
 
 
 
-// Create Operators Numbers
+// Create Operators Objects to be used
 const operators = [
     {
         symbol: "+",
@@ -142,10 +144,10 @@ function createOpButtons() {
     operators.map((item) => {
         const createButton = document.createElement("button")
         createButton.setAttribute("id", `operator-${item.meaning}`)
-        if (item.isEqual) {
+        if (item.isEqual) { // Will check for equal buttons
             createButton.setAttribute("class", `equals`)
 
-        } else {
+        } else { // The rest of operators buttons
             createButton.setAttribute("class", `operators`)
         }
         createButton.textContent = item.symbol;
@@ -160,30 +162,36 @@ function createOpButtons() {
             const opValue = e.target.value
             numContainer.push(opValue)
             const spanBox = document.createElement("span")
+            spanBox.setAttribute("class", "op-counter")
             spanBox.value = opValue
             spanBox.textContent = opValue
             counterResult.appendChild(spanBox)
 
+            // Will select buttons with "operators" class (which exclude equal buttons)
             if (button.classList.contains("operators")) {
                 const getOperatorList = [...operators.map((item) => item.symbol)] // Get operators availabel
                 const filterOp = numContainer.filter((sub) => getOperatorList.includes(sub))
                 const filterSecOp = filterOp.length > 1
                 // Create a function where input second operator will use operate automatically 
                 function secondOperator() {
-                    numContainer.pop()
-                    operate()
-                    counterResult.appendChild(spanBox)
-                    numContainer.push(opValue)
+                    const lastCounter = counterResult.lastChild.previousSibling;
+                    const checkClass = lastCounter.className
+                    // Check if user input double operators consecutively
+                    if (checkClass === "op-counter") {
+                        resultDisplay.textContent = "Error : Will only accept one operator only"
+                    } else {
+                        numContainer.pop()
+                        operate()
+                        counterResult.appendChild(spanBox)
+                        numContainer.push(opValue)
+                    }
                 }
-
-                if (filterSecOp) {
+                if (filterSecOp) { // Check if there is double operators detected
                     secondOperator()
                 }
             }
-
         })
     })
-
 }
 
 // This function will operate when user pressing equal button
@@ -193,34 +201,47 @@ function operate() {
 
     // Get index of operator to splice the array to first and second input number
     const operatorIdx = getOperatorList.map(item => { return numContainer.indexOf(item) })
-    const getIdx = Number(operatorIdx.filter((idx => parseInt(idx) > -1)))
-    const operatorValue = numContainer[getIdx]
-    // Create variable for fist and last number
-    let getfirstNum = Number(numContainer.slice(0, getIdx).join(""))
-    let getLastNum = Number(numContainer.slice(Number(getIdx) + 1).join(""))
+    const getIdx = Number(operatorIdx.filter((idx => parseInt(idx) > 0)))
 
-    // Assign function for each operators symbol
-    const assignOperator = operators.find(oper => oper.symbol === operatorValue)
-    const getFunction = assignOperator.functionUsed
+    //Check if user input the operator or not
+    if (getIdx <= 0) {
+        resultDisplay.textContent = "Error : No operator inputted, please try again"
+    } else {
+        const operatorValue = numContainer[getIdx]
+        // Create variable for fist and last number
+        let getFirstNum = (numContainer.slice(0, getIdx).join(""))
+        let getLastNum = (numContainer.slice(Number(getIdx) + 1).join(""))
+        // Assign function for each operators symbol
+        const assignOperator = operators.find(oper => oper.symbol === operatorValue)
 
-    // Return calculate result
-    let result = getFunction(getfirstNum, getLastNum)
-    counterResult.textContent = result
+        // Check if user input second number or not
+        if (getLastNum === "") {
+            resultDisplay.textContent = "Error : No second number inputted, try again"
+        } 
+        // Check if the inputed number could be converted to number
+        else if (!Number(getLastNum) || !Number(getFirstNum)) {
+            resultDisplay.textContent = "Error : Pleace Check Your Input Again"
+        } 
+        else { // When all conditions are fulfilled
+            resultDisplay.innerHTML = ""
+            const getFunction = assignOperator.functionUsed
+            // Return calculate result
+            let result = getFunction(getFirstNum, Number(getLastNum))
+            counterResult.textContent = result
 
-    // Clear the counter display 
-    numContainer = [result];
+            // Take the calculated result to continue
+            numContainer = [result];
+        }
+    }
 }
-
-
-
 
 // Main Function
 createNumButtons()
 createOpButtons()
 createClearButton()
 createDelButton()
-createResetButton()
 
+// Create event for equal button
 const equalButton = document.querySelector("#operator-equal");
 equalButton.addEventListener("click", operate)
 
