@@ -1,4 +1,14 @@
-// Create functions of basic for calculators
+// Scripts BreakDown
+// 1. Math Function Declaration (Add,Sub,Mul,Div) !
+// 2. Declare DOM variables available on current HTML !
+// 3. Clear Button Function !
+// 4. BackSpace Button Function !
+// 5. Number Button Function
+// 6. Operators Button Function
+// 7. Fetch Operation Function !
+// 8. Keydown Events
+
+// 1. Create functions of basic for calculators
 // Addition, Subtraction, Multiplication, Division
 
 function addNum(a, b) {
@@ -16,28 +26,29 @@ function mulNum(a, b) {
 function divNum(a, b) {
     // Show error message when user try to divide by zero
     if (Number(b) === 0) {
-        counterResult.textContent = "Error";
-        resultDisplay.textContent = "Divide by 0 will cause infinite result"
+        counterResult.innerHTML = ""
+        counterContainer = [];
+        errorDisplay.textContent = "Divide by 0 will cause infinite result"
     } else {
         return (Number(a) / Number(b)).toFixed(4)
     }
 }
 
+// 2. Declare Variables from HTML file
 // Create counter display for button input
 const counterResult = document.querySelector(".counter-result")
 const counterInput = document.querySelector(".counter-input")
 let counterContainer = []; // Container for operation
 let inputContainer = []; // Container for user input
-let firstValue = document.querySelector(".first-num")
-let operator = document.querySelector(".operator-function")
-let secondValue = document.querySelector(".second-num")
 
 // Set variable for input buttons (number and operators)
 const numButton = document.querySelector(".number-button")
 const opButton = document.querySelector(".operator-button")
 
+// Set variable for error message
 const errorDisplay = document.querySelector(".error-display")
 
+// 3. Create Clear Button Function
 // Create Clear Button to clear all inputs
 const clearButton = document.createElement("button")
 clearButton.textContent = "Clear"
@@ -45,13 +56,14 @@ opButton.appendChild(clearButton)
 clearButton.addEventListener("click", createClearButton)
 
 function createClearButton() {
-    inputContainer= [];
+    inputContainer = [];
     counterContainer = [];
-    counterInput.innerHTML = "Input :"
+    counterInput.innerHTML = "Input : "
     counterResult.innerHTML = "";
     errorDisplay.innerHTML = "";
 }
 
+// 4. Create BackSpace Button
 // Create backspace button
 const backButton = document.createElement("button")
 backButton.textContent = "BackSpace"
@@ -61,10 +73,12 @@ function createDelButton() {
     const lastInput = counterInput.lastChild
     inputContainer.pop();
     if (counterInput.childElementCount !== 0) {
+        errorDisplay.innerHTML = ""
         lastInput.remove();
     }
 }
 
+// 5. Create Number Buttons
 // Create number Buttons from (0-9) and (.)
 const numberInputList = [".", 0, 3, 2, 1, 6, 5, 4, 9, 8, 7]  // The array will be arranged in that position
 numberInputList.reverse().map((item) => {
@@ -76,31 +90,6 @@ numberInputList.reverse().map((item) => {
     numButton.appendChild(createButton)
 })
 
-const numberButtons = document.querySelectorAll(".numbers")
-numberButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
-        // Add the inputed button to counter display
-        const numValue = (e.target.value)
-        const lastIndex = inputContainer.length-1
-        if (numValue === ".") {
-            inputContainer.push(".")
-        } 
-        // Check if previous elements in inputContainer contains one operators
-        else if (getOperatorList.includes(inputContainer[lastIndex])&& inputContainer.length === 1){
-            const getOperator = inputContainer[0]
-            counterContainer.push(getOperator) // Push operator to counterContainer
-            createSpanResult(getOperator)
-            counterInput.innerHTML = "Input : "
-            inputContainer.shift()
-            inputContainer.push(numValue)
-        }
-        else {
-            inputContainer.push(numValue)
-        }
-        createNumButtons(numValue)
-    })
-})
-
 function createNumButtons(e) {
     const spanBox = document.createElement("span")
     spanBox.setAttribute("class", "number-counter")
@@ -109,6 +98,58 @@ function createNumButtons(e) {
     counterInput.appendChild(spanBox)
 }
 
+function numberClick(e) {
+    let numValue = e.target.value;
+    numberButtonFunction(numValue)
+}
+
+function numberButtonFunction(value) {
+    errorDisplay.innerHTML = ""
+    const getOperator = inputContainer[0]
+    const lastIndex = inputContainer.length - 1
+    const lastElement = inputContainer[lastIndex]
+    
+    // Check if user use equal button before
+    if (inputContainer.length == 0 && counterContainer.length == 1){
+        createClearButton()
+    }
+
+    // Check if previous elements in inputContainer contains one operators
+    if (getOperatorList.includes(lastElement) && inputContainer.length > 1) {        console.log("test")
+        counterContainer.push(lastElement) // Push operator to counterContainer
+        createSpanResult(lastElement)
+        inputContainer.shift()
+        inputContainer.push(value)
+        counterInput.innerHTML = `Input : `
+        createNumButtons(value)
+
+    }
+    if (exceptMinusOperation.includes(getOperator) && counterContainer.length == 0) {
+        errorDisplay.textContent = "Error : Input Numbers before Operators"
+    } else {
+        inputContainer.push(value)
+        createNumButtons(value)
+    }
+
+    if (getOperatorList.includes(getOperator) && inputContainer.length >= 1 && counterContainer.length != 0) {
+        let joinValue;
+        if (!getMinusOperation.includes(getOperator)) {
+            joinValue = getOperator
+            counterContainer.push(joinValue)
+            createSpanResult(joinValue)
+            inputContainer.shift()
+            counterInput.innerHTML = "Input : "
+            createNumButtons(value)
+        }
+    }
+}
+
+const numberButtons = document.querySelectorAll(".numbers")
+numberButtons.forEach(button => {
+    button.addEventListener("click", numberClick);
+})
+
+// 6. Create Operators Button
 // Create Operators Objects to be used
 const operators = [
     {
@@ -149,6 +190,10 @@ const operators = [
 
 ]
 
+const getOperatorList = [...operators.map((item) => item.symbol)] // Get operators availabel
+const getMinusOperation = operators.find(item => item.symbol === "-")?.symbol
+const exceptMinusOperation = getOperatorList.filter(item => item != "-" && item != "=")
+
 operators.map((item) => {
     const createButton = document.createElement("button")
     createButton.setAttribute("id", `operator-${item.meaning}`)
@@ -163,46 +208,6 @@ operators.map((item) => {
     opButton.appendChild(createButton)
 })
 
-const opButtons = document.querySelectorAll(".operators")
-opButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
-        // Add the inputed button to counter display]
-        const opValue = e.target.value
-        inputContainer.push(opValue)
-        // Check the inputContainer has numbers inputed before operators
-        let lastTwoIndex = inputContainer.length - 2// Index before operators added 
-        let lastIndex = inputContainer.slice(-1) // Take only operator element
-        if (Number(inputContainer[lastTwoIndex])) {
-            let firstValue = counterContainer[0] //Check if value exit in counterContainer
-            let secValue = counterContainer[1] //Check if operator exists in counterContainer
-            let joinNum;
-            if (!firstValue){
-                joinNum = inputContainer.slice(0, lastTwoIndex+1).join('') // Take numbers elements and join into one
-                counterContainer.push(joinNum) // Push joined number to counter result
-                createSpanResult(joinNum)
-            } else if(firstValue && secValue){
-                joinNum = inputContainer.slice(0,lastTwoIndex+1).join("")
-                counterContainer.push(Number(joinNum))
-            }
-            else{
-                joinNum = inputContainer.slice(0,lastTwoIndex+1).join("")
-                counterContainer.push(opValue)
-                counterContainer.push(Number(joinNum))
-            }
-            counterInput.innerHTML = "Input : "
-            inputContainer = lastIndex
-         } 
-
-        if (counterContainer.length==3){
-            operate()
-        }
-        // Operator span will be created regardless condition
-        if (counterContainer.length==3){ operate()}
-        createOpButtons(opValue)
-
-    })
-})
-
 // Create Operators Button Function
 function createOpButtons(e) {
     const spanBox = document.createElement("span")
@@ -212,7 +217,85 @@ function createOpButtons(e) {
     counterInput.appendChild(spanBox)
 }
 
-function createSpanResult(e) {
+function operatorClick(e) {
+    let opValue = e.target.value;
+    operatorButtonFunction(opValue)
+}
+
+function operatorButtonFunction(value) {
+    let lastIndex = inputContainer.length - 1// Index before operators added 
+    let filterOperation = inputContainer.filter(item => getOperatorList.includes(item))
+    const firstIdxMinus = getMinusOperation.includes(inputContainer[0])
+    // Check condition if number has been inputed before
+    if (counterContainer.length == 0 && exceptMinusOperation.includes(value) && inputContainer.length === 0) {
+        errorDisplay.textContent = "Error : Input Numbers before Operators"
+    }
+    // Check if previous element contain another operator
+    if (filterOperation.length >= 1 && !firstIdxMinus && counterContainer.length === 0) {
+        errorDisplay.textContent = "Error : Will only accept one operators"
+    }
+    else if (counterContainer.length != 0 && getOperatorList.includes(inputContainer[0])) {
+        if (getMinusOperation.includes(value) && !getOperatorList.includes(counterContainer[1])) {
+            const getFirstOperator = inputContainer[0]
+            counterContainer.push(getFirstOperator)
+            createSpanResult(getFirstOperator)
+            inputContainer.shift()
+            counterInput.innerHTML = "Input : "
+            inputContainer.push(value)
+            createSpanInput(value)
+        } else {
+            errorDisplay.textContent = "Error : Will only accept one operators"
+
+        }
+    }
+
+    else if (getMinusOperation.includes(inputContainer[lastIndex])) {
+        inputContainer.push(value)
+        createSpanInput(value)
+    }
+
+    else {
+        if (Number(inputContainer[lastIndex])) {
+            let firstValue = counterContainer[0] //Check if value exit in counterContainer
+            let secValue = counterContainer[1] //Check if operator exists in counterContainer
+            let joinNum;
+            if (firstIdxMinus) {
+                joinArray = inputContainer.slice().join("")
+            }
+            if (!firstValue) {
+                joinArray = inputContainer.slice() // Take numbers elements and join into one
+                counterContainer.push(joinArray.join("")) // Push joined number to counter result
+                createSpanResult(joinArray.join(""))
+            }
+            else if (firstValue && secValue) {
+                joinNum = inputContainer.slice(0, lastIndex + 1).join("")
+                counterContainer.push(Number(joinNum))
+            }
+            else {
+                joinNum = inputContainer.slice(0, lastIndex + 1).join("")
+                counterContainer.push(value)
+                counterContainer.push(Number(joinNum))
+            }
+            inputContainer = [];
+            counterInput.innerHTML = "Input : "
+        }
+        // Operator span will be created regardless condition
+        if (counterContainer.length == 3) { operate() }
+
+        createOpButtons(value)
+        inputContainer.push(value)
+    }
+
+}
+
+
+const opButtons = document.querySelectorAll(".operators")
+opButtons.forEach((button) => {
+    button.addEventListener("click", operatorButtonFunction)
+})
+
+// Bonus : Create Span Element for Inputs
+function createSpanResult(e) { // To CounterResult
     const spanBox = document.createElement("span")
     spanBox.setAttribute("class", "span-counter")
     spanBox.value = e
@@ -220,7 +303,7 @@ function createSpanResult(e) {
     counterResult.appendChild(spanBox)
 }
 
-function createSpanInput(e) {
+function createSpanInput(e) { // TO Counter-Input
     const spanBox = document.createElement("span")
     spanBox.setAttribute("class", "span-counter")
     spanBox.value = e
@@ -228,7 +311,7 @@ function createSpanInput(e) {
     counterInput.appendChild(spanBox)
 }
 
-
+// 7. Create Fetch Operation Function
 // This function will operate when user pressing equal button
 function operate() {
     const getFirstNum = Number(counterContainer[0])
@@ -236,152 +319,88 @@ function operate() {
     const getOperatorObject = operators.find(oper => oper.symbol === getOperator)
     const getLastNum = Number(counterContainer[2])
 
+
     // Check if counterContainer contains complete requirement (two numbers and operator)
-    if (!getOperator){
+    if (!getOperator) {
         errorDisplay.textContent = "Error : Please input at least one operators"
-    } else if(!getLastNum || !getFirstNum){
+    } else if (!getFirstNum && !getLastNum && !!getLastNum != 0) {
         errorDisplay.textContent = "Error : Please input at least two functional numbers"
-    } else{
+    } else {
         errorDisplay.innerHTML = ""
         const getFunction = getOperatorObject.functionUsed // Get function from object attached
 
         // Create span with the result
         const resultSpan = document.createElement("span")
-        let result = getFunction(getFirstNum, Number(getLastNum))
-        resultSpan.textContent = String(result)
-        resultSpan.id = "result-counter"
-        counterResult.innerHTML = ""
-        counterResult.appendChild(resultSpan)
-
-        // Take the calculated result to continue
-        counterContainer = [result];
+        let result = getFunction(getFirstNum, getLastNum)
+        if (result !== undefined) {
+            resultSpan.textContent = String(result)
+            resultSpan.id = "result-counter"
+            counterResult.innerHTML = ""
+            counterResult.appendChild(resultSpan)
+            // Take the calculated result to continue
+            counterContainer = [result];
+        }
     }
 }
 
 // Create event for equal button
 const equalButton = document.querySelector("#operator-equal");
-equalButton.addEventListener("click", ()=>{
+equalButton.addEventListener("click", equalButtonFunction)
+
+function equalButtonFunction() {
     let getOperator = inputContainer[0]
 
-    if (getOperatorList.includes(getOperator)){
-        const lastSpan = counterInput.lastChild
-        lastSpan.remove()
-        createSpanResult(getOperator)
-    } else { 
+    // TO handle subtration function
+    if (counterContainer.length != 0 && getMinusOperation.includes(getOperator)){
+        if (counterContainer[1] !== "-"){
+            counterContainer.push(getOperator)
+            inputContainer.shift()
+            counterInput.innerHTML = ""
+        } 
+    }
+    if (counterContainer.length == 0 && getOperatorList.includes(getOperator)) {
+        errorDisplay.textContent = "Error : Input Numbers before Operators"
+    }
+    else {
         let firstValue = counterContainer[0]
         let secValue = counterContainer[1]
         // Check if counterContainer is empty or does not contain operator
-        if (!typeof Number(firstValue) == "number" || !secValue){
+        if (!typeof Number(firstValue) == "number" || !secValue) {
             errorDisplay.textContent = "Error : Please input at least one operator"
-        } else{
-        const joinNum = inputContainer.join("")
-        const allNumberSpan = document.querySelectorAll(".number-counter")
-        counterContainer.push(joinNum)
-        inputContainer = [];
-        allNumberSpan.forEach(e=>e.remove())
-        createSpanResult(joinNum)
         }
-        
-    }
-    if (counterContainer.length==3){
-        operate()
-        inputContainer = []};
-})
-const getOperatorList = [...operators.map((item) => item.symbol)] // Get operators availabel
-
-document.addEventListener("keydown", (e) => {
-    let keyInput = e.key
-    let getOperator = inputContainer[0]
-
-    const inputOperator = getOperatorList.includes(keyInput)
-    if (keyInput === "Enter" || keyInput === "=") { 
-        if (getOperatorList.includes(getOperator)){
-            const lastSpan = counterInput.lastChild
-            lastSpan.remove()
-            createSpanResult(getOperator)
-        } else { 
-            let firstValue = counterContainer[0]
-            let secValue = counterContainer[1]
-            // Check if counterContainer is empty or does not contain operator
-            if (!typeof Number(firstValue) == "number" || !secValue){
-                errorDisplay.textContent = "Error : Please input at least one operator"
-            } else{
+        else if (inputContainer.length == 0 && counterContainer.length >= 2) {
+            errorDisplay.textContent = "Error : Please input one more number to operate"
+        }
+        else {
             const joinNum = inputContainer.join("")
             const allNumberSpan = document.querySelectorAll(".number-counter")
+            const spanCounter = document.querySelectorAll(".span-counter")
             counterContainer.push(joinNum)
             inputContainer = [];
-            allNumberSpan.forEach(e=>e.remove())
+            allNumberSpan.forEach(e => e.remove())
+            spanCounter.forEach(e => e.remove())
             createSpanResult(joinNum)
-            }
-            
         }
-        if (counterContainer.length==3){
-            operate()
-            inputContainer = []};
 
     }
-         
+    if (counterContainer.length == 3) {
+        operate();
+        inputContainer = [];
+    };
+}
+
+// 8. Keydown Events
+document.addEventListener("keydown", (e) => {
+    let keyInput = e.key
+    const inputOperator = getOperatorList.includes(keyInput)
+    if (keyInput === "Enter" || keyInput === "=") { equalButtonFunction() }
     else if (keyInput === "Backspace") { createDelButton() }
     else if (keyInput === "c" && e.altKey) {
         e.preventDefault();
         createClearButton()
     }
-    else if (Number(keyInput) || keyInput === "." || keyInput === "0") {
-         // Add the inputed button to counter display
-         const numValue = keyInput
-         const lastIndex = inputContainer.length-1
-         if (numValue === ".") {
-             inputContainer.push(".")
-         } 
-         // Check if previous elements in inputContainer contains one operators
-         else if (getOperatorList.includes(inputContainer[lastIndex])&& inputContainer.length === 1){
-             const getOperator = inputContainer[0]
-             counterContainer.push(getOperator) // Push operator to counterContainer
-             createSpanResult(getOperator)
-             counterInput.innerHTML = "Input : "
-             inputContainer.shift()
-             inputContainer.push(numValue)
-         }
-         else {
-             inputContainer.push(numValue)
-         }
-         createNumButtons(numValue)
-    }
-
-    else if (inputOperator) {
-        const opValue = keyInput
-        inputContainer.push(opValue)
-         // Check the inputContainer has numbers inputed before operators
-         let lastTwoIndex = inputContainer.length - 2// Index before operators added 
-         let lastIndex = inputContainer.slice(-1) // Take only operator element
-         if (Number(inputContainer[lastTwoIndex])) {
-            let firstValue = counterContainer[0] //Check if value exit in counterContainer
-            let secValue = counterContainer[1] //Check if operator exists in counterContainer
-            let joinNum;
-            if (!firstValue){
-                joinNum = inputContainer.slice(0, lastTwoIndex+1).join('') // Take numbers elements and join into one
-                counterContainer.push(joinNum) // Push joined number to counter result
-                createSpanResult(joinNum)
-            } else if(firstValue && secValue){
-                joinNum = inputContainer.slice(0,lastTwoIndex+1).join("")
-                counterContainer.push(Number(joinNum))
-            }
-            else{
-                joinNum = inputContainer.slice(0,lastTwoIndex+1).join("")
-                counterContainer.push(opValue)
-                counterContainer.push(Number(joinNum))
-            }
-            counterInput.innerHTML = "Input : "
-            inputContainer = lastIndex
-         } 
-
-         if (counterContainer.length==3){
-             operate()
-         }
-         // Operator span will be created regardless condition
-         createOpButtons(opValue)
-
-    }
+    else if (Number(keyInput) || keyInput === "." || keyInput == "0") { numberButtonFunction(keyInput) }
+    else if (inputOperator) { operatorButtonFunction(keyInput) }
     console.log(inputContainer)
     console.log(counterContainer)
 })
