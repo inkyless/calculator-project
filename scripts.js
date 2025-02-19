@@ -229,65 +229,73 @@ function operatorButtonFunction(value) {
     let lastIndex = inputContainer.length - 1// Index before operators added 
     let filterOperation = inputContainer.filter(item => getOperatorList.includes(item))
     const firstIdxMinus = getMinusOperation.includes(inputContainer[0])
-    // Check condition if number has been inputed before
-    if (counterContainer.length == 0 && exceptMinusOperation.includes(value) && inputContainer.length === 0) {
-        errorDisplay.textContent = "Input Numbers before Operators"
-    }
-    // Check if previous element contain another operator
-    if (filterOperation.length >= 1 && !firstIdxMinus && counterContainer.length === 0) {
-        errorDisplay.textContent = "Will only accept one operators"
-    }
-    else if (counterContainer.length != 0 && getOperatorList.includes(inputContainer[0])) {
-        if (getMinusOperation.includes(value) && !getOperatorList.includes(counterContainer[1])) {
-            const getFirstOperator = inputContainer[0]
-            counterContainer.push(getFirstOperator)
-            createSpanResult(getFirstOperator)
-            inputContainer.shift()
-            counterInput.innerHTML = ""
-            inputContainer.push(value)
-            createSpanInput(value)
-        } else {
-            errorDisplay.textContent = "Will only accept one operators"
+    let joinArray = inputContainer.slice().join("")
 
-        }
-    }
-
-    else if (getMinusOperation.includes(inputContainer[lastIndex])) {
+    if (!(Number(joinArray)) && inputContainer[lastIndex]!=="0" && inputContainer.length !=0) {
+        errorDisplay.textContent = "Input appropriate number"}
+    else{
+// Check condition if number has been inputed before
+if (counterContainer.length == 0 && exceptMinusOperation.includes(value) && inputContainer.length === 0) {
+    errorDisplay.textContent = "Input Numbers before Operators"
+}
+// Check if previous element contain another operator
+if (filterOperation.length >= 1 && !firstIdxMinus && counterContainer.length === 0) {
+    errorDisplay.textContent = "Will only accept one operators"
+}
+else if (counterContainer.length != 0 && getOperatorList.includes(inputContainer[0])) {
+    if (getMinusOperation.includes(value) && !getOperatorList.includes(counterContainer[1])) {
+        const getFirstOperator = inputContainer[0]
+        counterContainer.push(getFirstOperator)
+        createSpanResult(getFirstOperator)
+        inputContainer.shift()
+        counterInput.innerHTML = ""
         inputContainer.push(value)
         createSpanInput(value)
-    }
+    } else {
+        errorDisplay.textContent = "Will only accept one operators"
 
-    else {
-        if (Number(inputContainer[lastIndex]) || inputContainer[lastIndex] == "0") {
-            let firstValue = counterContainer[0] //Check if value exit in counterContainer
-            let secValue = counterContainer[1] //Check if operator exists in counterContainer
-            let joinNum;
-            if (firstIdxMinus) {
-                joinArray = inputContainer.slice().join("")
-            }
-            if (!firstValue) {
-                joinArray = inputContainer.slice() // Take numbers elements and join into one
-                counterContainer.push(joinArray.join("")) // Push joined number to counter result
-                createSpanResult(joinArray.join(""))
-            }
-            else if (firstValue && secValue) {
-                joinNum = inputContainer.slice(0, lastIndex + 1).join("")
-                counterContainer.push(Number(joinNum))
-            }
-            else {
-                joinNum = inputContainer.slice(0, lastIndex + 1).join("")
-                counterContainer.push(value)
-                counterContainer.push(Number(joinNum))
-            }
-            inputContainer = [];
-            counterInput.innerHTML = ""
+    }
+}
+
+else if (getMinusOperation.includes(inputContainer[lastIndex])) {
+    inputContainer.push(value)
+    createSpanInput(value)
+}
+
+else {
+    if (Number(inputContainer[lastIndex]) || inputContainer[lastIndex] == "0") {
+        let firstValue = counterContainer[0] //Check if value exit in counterContainer
+        let secValue = counterContainer[1] //Check if operator exists in counterContainer
+        let joinNum;
+        if (firstIdxMinus) {
+            joinArray = inputContainer.slice().join("")
         }
-        // Operator span will be created regardless condition
-        if (counterContainer.length == 3) { operate() }
-
-        createOpButtons(value)
-        inputContainer.push(value)
+        
+        if (!firstValue) {
+            joinArray = inputContainer.slice() // Take numbers elements and join into one
+            counterContainer.push(joinArray.join("")) // Push joined number to counter result
+            createSpanResult(joinArray.join(""))
+        }
+        else if (firstValue && secValue) {
+            joinNum = inputContainer.slice(0, lastIndex + 1).join("")
+            counterContainer.push(Number(joinNum))
+        }
+        else {
+            joinNum = inputContainer.slice(0, lastIndex + 1).join("")
+            counterContainer.push(value)
+            counterContainer.push(Number(joinNum))
+        }
+        inputContainer = [];
+        counterInput.innerHTML = ""
     }
+    // Operator span will be created regardless condition
+    if (counterContainer.length == 3) { operate() }
+
+    createOpButtons(value)
+    inputContainer.push(value)
+}
+    }
+    
 
 }
 
@@ -322,13 +330,13 @@ function operate() {
     const getOperatorObject = operators.find(oper => oper.symbol === getOperator)
     const getLastNum = Number(counterContainer[2])
 
-
     // Check if counterContainer contains complete requirement (two numbers and operator)
     if (!getOperator) {
         errorDisplay.textContent = "Please input at least one operators"
     } else if (!getFirstNum && !getLastNum && !!getLastNum != 0) {
         errorDisplay.textContent = "Please input at least two functional numbers"
-    } else {
+    }
+    else {
         errorDisplay.innerHTML = ""
         const getFunction = getOperatorObject.functionUsed // Get function from object attached
 
@@ -378,11 +386,17 @@ function equalButtonFunction() {
             const joinNum = inputContainer.join("")
             const allNumberSpan = document.querySelectorAll(".number-counter")
             const spanCounter = document.querySelectorAll(".span-counter")
-            counterContainer.push(joinNum)
-            inputContainer = [];
-            allNumberSpan.forEach(e => e.remove())
-            spanCounter.forEach(e => e.remove())
-            createSpanResult(joinNum)
+            if (!Number(joinNum)){
+                errorDisplay.textContent = "Please input appropriate number"
+
+            } else{
+                counterContainer.push(joinNum)
+                inputContainer = [];
+                allNumberSpan.forEach(e => e.remove())
+                spanCounter.forEach(e => e.remove())
+                createSpanResult(joinNum)
+            }
+
         }
 
     }
