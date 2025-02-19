@@ -231,7 +231,7 @@ function operatorButtonFunction(value) {
     const firstIdxMinus = getMinusOperation.includes(inputContainer[0])
     let joinArray = inputContainer.slice().join("")
 
-    if (!(Number(joinArray)) && inputContainer[lastIndex]!=="0" && inputContainer.length !=0) {
+    if (!(Number(joinArray)) && inputContainer[lastIndex]!=="0" && inputContainer.length !=0 && !getOperatorList.includes(value)) {
         errorDisplay.textContent = "Input appropriate number"}
     else{
 // Check condition if number has been inputed before
