@@ -1,0 +1,242 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --counter-display: #D6E9D6;
+    --bottom-body: #262A35;
+    --text-counter: #9AA0A5;
+    --button-color: #59626B;
+    --non-operator-color: #93BA7F;
+    --calculator-font: 'Courier New', Courier, monospace;
+    --equal-button: #B06E89;
+    --button-text-color: #E9EAEB;
+    --background: rgba(79, 77, 101, 0.5)
+}
+
+body {
+    font-family: var(--calculator-font);
+    padding: 0;
+    margin: 0;
+    background-color: var(--background);
+    height: 100%;
+}
+
+#calculator-box {
+    max-width: 55%;
+    margin: 0 auto;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    background-color: var(--bottom-body);
+    border-radius: 10px;
+    box-shadow: 5px 5px #1B1822;
+}
+
+#title {
+    color: var(--button-text-color);
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 0.5rem
+}
+
+#input-display {
+    background-color: var(--counter-display);
+    border-radius: 10px;
+}
+
+.counter-result {
+    padding: 0.5rem 1.2rem;
+    font-size: 1.8em;
+    height: 2em;
+    align-items: center;
+}
+
+.counter-input {
+    padding: 0.5rem 1.2rem;
+    font-size: 1.5em;
+    height: 2.2em;
+    text-align: right;
+}
+
+.error-display {
+    padding: 0.5rem 1rem;
+    height: 2em;
+}
+
+.counter-input,
+.counter-result,
+.error-display {
+    color: var(--text-counter);
+}
+
+
+.non-operator-button {
+    display: flex;
+    gap: 10px;
+    padding: 1rem 0 0;
+}
+
+.non-operator-button>button {
+    padding: 1.5rem;
+    flex-grow: 2;
+    font-size: 1.2em;
+    background-color: var(--non-operator-color);
+}
+
+#clear-button::after {
+    content: "Clear"
+}
+
+.number-button {
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: repeat(3, 2fr);
+    flex-grow: 2;
+}
+
+.numbers {
+    font-size: 1.5em;
+    padding: 2rem;
+}
+
+#bottom-part {
+    display: flex;
+    gap: 10px;
+    padding: 1rem 0;
+}
+
+.operator-button {
+    display: grid;
+    row-gap: 10px;
+}
+
+.operators {
+    font-size: 1.5em;
+    padding: 2rem;
+}
+
+.numbers,
+.operators {
+    background-color: var(--button-color);
+}
+
+.equals {
+    font-size: 1.5em;
+    background-color: var(--equal-button);
+}
+
+.numbers,
+.operators,
+.non-operator-button button,
+.equals {
+    border-radius: 15px;
+    font-family: var(--calculator-font);
+    color: var(--button-text-color);
+    box-shadow: 3px 3px 3px #1B1822;
+    border: none;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 1rem 0 0;
+    background-color: var(--bottom-body);
+    color: white;
+    text-align: center;
+  }
+
+@media(max-width :720px) {
+    body{
+        height: 75vh;
+    }
+
+    #calculator-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0.8rem;
+        max-width: 70%;
+    }
+
+    #title {
+        font-size: 1.5em;
+        padding: 0;
+    }
+
+    #input-display{
+        min-height: 25%;
+        padding: 1rem 0;
+    }
+
+    .error-display {
+        padding: 0.2rem 0.5rem;
+        font-size: 1em;
+        display: flex;
+        flex-grow: 2;
+    }
+
+    .counter-input,
+    .counter-result {
+        font-size: 1.25em;
+    }
+
+    .numbers,
+    .operators,
+    .non-operator-button button,
+    .equals {
+        font-size: 1em;
+        padding: 0.5rem;
+    }
+
+    .operators {
+        padding: 1rem;
+    }
+
+    #clear-button::after {
+        content: "A/C";
+    }
+
+    #bottom-part{
+        min-height: 100%;
+    }
+
+}
+
+@media(max-width : 375px){
+    #calculator-box{
+        margin: 1rem;
+        min-width: 75%;
+    }
+}
+
+@media(min-width:1440px){
+    #title {
+        font-size: 2.5em;
+    }
+
+    .error-display {
+        padding: 0.5rem 1rem;
+        font-size: 1.8em;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .counter-input,
+    .counter-result {
+        font-size: 2.5em;
+    }
+
+    .numbers,
+    .operators,
+    .non-operator-button button,
+    .equals {
+        font-size: 2em;
+        padding: 1.5rem;
+    }
+
+    .operators{
+        padding: 1.5rem 2.5rem;
+    }
+}

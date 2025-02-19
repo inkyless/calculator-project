@@ -1,19 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator</title>
     <link href="style.css" rel="stylesheet">
 </head>
+
 <body>
-<!--A calculator will consists of number (0-9), operators in design-->
-<div class="counter-result"></div>
-<div class="counter-input">Input : </div> <!--This counter shows when user input-->
-<div class="number-button"></div>
-<div class="operator-button"></div>
-<div class="error-display"></div>
-    
+    <!--A calculator will consists of number (0-9), operators in design-->
+    <div id="calculator-box">
+        <div id="title"><span>CALC</span></div>
+        <div id="input-display">
+            <div class="counter-result"></div>
+            <div class="counter-input"></div> <!--This counter shows when user input-->
+            <div class="error-display"></div>
+        </div>
+        <div id="button-display">
+            <div class="non-operator-button"></div>
+            <div id="bottom-part">
+                <div class="number-button"></div>
+                <div class="operator-button"></div>
+            </div>
+        </div>
+    </div>
+<div class="footer">
+    <span>Basic Calculator created by inkyless</span>
+    <p>With HTML, CSS, vanilla JS</p>
+</div>
 </body>
 <script src="scripts.js"></script>
+
 </html>

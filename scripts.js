@@ -44,6 +44,7 @@ let inputContainer = []; // Container for user input
 // Set variable for input buttons (number and operators)
 const numButton = document.querySelector(".number-button")
 const opButton = document.querySelector(".operator-button")
+const nonOpButton = document.querySelector(".non-operator-button")
 
 // Set variable for error message
 const errorDisplay = document.querySelector(".error-display")
@@ -51,14 +52,14 @@ const errorDisplay = document.querySelector(".error-display")
 // 3. Create Clear Button Function
 // Create Clear Button to clear all inputs
 const clearButton = document.createElement("button")
-clearButton.textContent = "Clear"
-opButton.appendChild(clearButton)
+clearButton.id = "clear-button"
+nonOpButton.appendChild(clearButton)
 clearButton.addEventListener("click", createClearButton)
 
 function createClearButton() {
     inputContainer = [];
     counterContainer = [];
-    counterInput.innerHTML = "Input : "
+    counterInput.innerHTML = ""
     counterResult.innerHTML = "";
     errorDisplay.innerHTML = "";
 }
@@ -67,7 +68,8 @@ function createClearButton() {
 // Create backspace button
 const backButton = document.createElement("button")
 backButton.textContent = "BackSpace"
-opButton.appendChild(backButton)
+backButton.id = "back-button"
+nonOpButton.appendChild(backButton)
 backButton.addEventListener("click", createDelButton)
 function createDelButton() {
     const lastInput = counterInput.lastChild
@@ -80,7 +82,7 @@ function createDelButton() {
 
 // 5. Create Number Buttons
 // Create number Buttons from (0-9) and (.)
-const numberInputList = [".", 0, 3, 2, 1, 6, 5, 4, 9, 8, 7]  // The array will be arranged in that position
+const numberInputList = [0,".", 3, 2, 1, 6, 5, 4, 9, 8, 7]  // The array will be arranged in that position
 numberInputList.reverse().map((item) => {
     const createButton = document.createElement("button")
     createButton.setAttribute("id", `number-${item}`)
@@ -120,12 +122,12 @@ function numberButtonFunction(value) {
         createSpanResult(lastElement)
         inputContainer.shift()
         inputContainer.push(value)
-        counterInput.innerHTML = `Input : `
+        counterInput.innerHTML = ``
         createNumButtons(value)
 
     }
     if (exceptMinusOperation.includes(getOperator) && counterContainer.length == 0) {
-        errorDisplay.textContent = "Error : Input Numbers before Operators"
+        errorDisplay.textContent = "Input Numbers before Operators"
     } else {
         inputContainer.push(value)
         createNumButtons(value)
@@ -138,7 +140,7 @@ function numberButtonFunction(value) {
             counterContainer.push(joinValue)
             createSpanResult(joinValue)
             inputContainer.shift()
-            counterInput.innerHTML = "Input : "
+            counterInput.innerHTML = ""
             createNumButtons(value)
         }
     }
@@ -194,18 +196,19 @@ const getOperatorList = [...operators.map((item) => item.symbol)] // Get operato
 const getMinusOperation = operators.find(item => item.symbol === "-")?.symbol
 const exceptMinusOperation = getOperatorList.filter(item => item != "-" && item != "=")
 
-operators.map((item) => {
+operators.reverse().map((item) => {
     const createButton = document.createElement("button")
     createButton.setAttribute("id", `operator-${item.meaning}`)
+    createButton.textContent = item.symbol;
+    createButton.value = item.symbol
     if (item.isEqual) { // Will check for equal buttons
         createButton.setAttribute("class", `equals`)
+        numButton.appendChild(createButton)
 
     } else { // The rest of operators buttons
         createButton.setAttribute("class", `operators`)
+        opButton.appendChild(createButton)
     }
-    createButton.textContent = item.symbol;
-    createButton.value = item.symbol
-    opButton.appendChild(createButton)
 })
 
 // Create Operators Button Function
@@ -228,11 +231,11 @@ function operatorButtonFunction(value) {
     const firstIdxMinus = getMinusOperation.includes(inputContainer[0])
     // Check condition if number has been inputed before
     if (counterContainer.length == 0 && exceptMinusOperation.includes(value) && inputContainer.length === 0) {
-        errorDisplay.textContent = "Error : Input Numbers before Operators"
+        errorDisplay.textContent = "Input Numbers before Operators"
     }
     // Check if previous element contain another operator
     if (filterOperation.length >= 1 && !firstIdxMinus && counterContainer.length === 0) {
-        errorDisplay.textContent = "Error : Will only accept one operators"
+        errorDisplay.textContent = "Will only accept one operators"
     }
     else if (counterContainer.length != 0 && getOperatorList.includes(inputContainer[0])) {
         if (getMinusOperation.includes(value) && !getOperatorList.includes(counterContainer[1])) {
@@ -240,11 +243,11 @@ function operatorButtonFunction(value) {
             counterContainer.push(getFirstOperator)
             createSpanResult(getFirstOperator)
             inputContainer.shift()
-            counterInput.innerHTML = "Input : "
+            counterInput.innerHTML = ""
             inputContainer.push(value)
             createSpanInput(value)
         } else {
-            errorDisplay.textContent = "Error : Will only accept one operators"
+            errorDisplay.textContent = "Will only accept one operators"
 
         }
     }
@@ -255,7 +258,7 @@ function operatorButtonFunction(value) {
     }
 
     else {
-        if (Number(inputContainer[lastIndex])) {
+        if (Number(inputContainer[lastIndex]) || inputContainer[lastIndex] == "0") {
             let firstValue = counterContainer[0] //Check if value exit in counterContainer
             let secValue = counterContainer[1] //Check if operator exists in counterContainer
             let joinNum;
@@ -277,7 +280,7 @@ function operatorButtonFunction(value) {
                 counterContainer.push(Number(joinNum))
             }
             inputContainer = [];
-            counterInput.innerHTML = "Input : "
+            counterInput.innerHTML = ""
         }
         // Operator span will be created regardless condition
         if (counterContainer.length == 3) { operate() }
@@ -291,7 +294,7 @@ function operatorButtonFunction(value) {
 
 const opButtons = document.querySelectorAll(".operators")
 opButtons.forEach((button) => {
-    button.addEventListener("click", operatorButtonFunction)
+    button.addEventListener("click", operatorClick)
 })
 
 // Bonus : Create Span Element for Inputs
@@ -322,9 +325,9 @@ function operate() {
 
     // Check if counterContainer contains complete requirement (two numbers and operator)
     if (!getOperator) {
-        errorDisplay.textContent = "Error : Please input at least one operators"
+        errorDisplay.textContent = "Please input at least one operators"
     } else if (!getFirstNum && !getLastNum && !!getLastNum != 0) {
-        errorDisplay.textContent = "Error : Please input at least two functional numbers"
+        errorDisplay.textContent = "Please input at least two functional numbers"
     } else {
         errorDisplay.innerHTML = ""
         const getFunction = getOperatorObject.functionUsed // Get function from object attached
@@ -359,17 +362,17 @@ function equalButtonFunction() {
         } 
     }
     if (counterContainer.length == 0 && getOperatorList.includes(getOperator)) {
-        errorDisplay.textContent = "Error : Input Numbers before Operators"
+        errorDisplay.textContent = "Input Numbers before Operators"
     }
     else {
         let firstValue = counterContainer[0]
         let secValue = counterContainer[1]
         // Check if counterContainer is empty or does not contain operator
         if (!typeof Number(firstValue) == "number" || !secValue) {
-            errorDisplay.textContent = "Error : Please input at least one operator"
+            errorDisplay.textContent = "Please input at least one operator"
         }
         else if (inputContainer.length == 0 && counterContainer.length >= 2) {
-            errorDisplay.textContent = "Error : Please input one more number to operate"
+            errorDisplay.textContent = "Please input one more number to operate"
         }
         else {
             const joinNum = inputContainer.join("")
